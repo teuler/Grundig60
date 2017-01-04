@@ -15,33 +15,33 @@ bool handleKeyInput(char ch)
     case '?':
       Serial.println(F("---"));
       Serial.println(F("? help"));
-      Serial.println(F("n  next program"));      
-      Serial.println(F("p  previous program"));      
+      Serial.println(F("n  next program"));
+      Serial.println(F("p  previous program"));
       Serial.println(F("+  increase volume"));
-      Serial.println(F("-  decrease volume"));      
-      Serial.println(F("m  toggle mute/unmute"));    
-      Serial.println(F("i  update program info"));  
-      Serial.println(F("t  toggle amplifier power"));  
+      Serial.println(F("-  decrease volume"));
+      Serial.println(F("m  toggle mute/unmute"));
+      Serial.println(F("i  update program info"));
+      Serial.println(F("t  toggle amplifier power"));
       Serial.println(F("r  switch to radio (DAB)"));
       Serial.println(F("x  switch to AUX"));
       Serial.println(F("e  change equalizer mode"));
       Serial.println();
-      Serial.println(F("a  start autosearch for DAB programs"));            
-      Serial.println(F("c  enable RTC clock sync"));  
-      Serial.println(F("0  adjust info LED's hue and saturation"));  
+      Serial.println(F("a  start autosearch for DAB programs"));
+      Serial.println(F("c  enable RTC clock sync"));
+      Serial.println(F("0  adjust info LED's hue and saturation"));
       Serial.println(F("d  calibrate program dial"));
       Serial.println();
-      Serial.println(F("!  write current configuration to EEPROM"));  
+      Serial.println(F("!  write current configuration to EEPROM"));
       Serial.println(F("---"));
       break;
-  
+
     case 'n':
       if(Radio.progDAB < monkeyRadio.getDABProgramCount()-1) {
         iPrevProg = Radio.progDAB;
         dirProg   = +1;
         Radio.progDAB++;
         Radio.isProgChanged = true;
-      }  
+      }
       break;
 
     case 'p':
@@ -50,7 +50,7 @@ bool handleKeyInput(char ch)
         dirProg   = -1;
         Radio.progDAB--;
         Radio.isProgChanged = true;
-      }  
+      }
       break;
 
     case 'm':
@@ -67,16 +67,16 @@ bool handleKeyInput(char ch)
     case '+':
       monkeyRadio.volumePlus();
       Radio.volume = monkeyRadio.getVolume();
-      break;  
+      break;
 
     case '-':
       monkeyRadio.volumeMinus();
       Radio.volume = monkeyRadio.getVolume();
-      break;  
+      break;
 
     case 'a':
       setLEDStatus_Info(ID_COLOR_AUTOSEEK, -1, true);
-      monkeyRadio.DABAutoSearch(DAB_MIN_PROG, DAB_MAX_PROG);
+      monkeyRadio.DABAutoSearch(DAB_MIN_PROG, DAB_MAX_PROG, (displayFunc)displayMsg);
       if(monkeyRadio.getDABProgramCount() > 0) {
         Radio.isProgChanged = true;
         Radio.progDAB       = 0;
@@ -92,16 +92,16 @@ bool handleKeyInput(char ch)
 
     case '!':
       writeConfig();
-      break;  
+      break;
 
     case 'c':
       monkeyRadio.syncRTC(true);
-      break;  
+      break;
 
     case 't':
       if(isAmpPowerOn)
         switchAmpPower(false);
-      else  
+      else
         switchAmpPower(true);
       break;
 
@@ -130,7 +130,7 @@ bool handleKeyInput(char ch)
       Serial.println(F("Move program dial to the very LEFT and press a key ..."));
       while(!Serial.available())
         delay(20);
-      Serial.read();  
+      Serial.read();
       Conf.minCap = readDialCapacitanceAvg(Controls[DIAL_PROGRAM].pin, Controls[DIAL_PROGRAM].pin2, 10);
 
       Serial.println(F("Move program dial to the very RIGHT and press a key ..."));
@@ -151,7 +151,7 @@ bool handleKeyInput(char ch)
       Serial.print(F(" .. "));
       Serial.print(Conf.maxCap, 1);
       Serial.println();
-      
+
       updateProgramDialParams();
       writeConfig();
       break;
@@ -161,7 +161,7 @@ bool handleKeyInput(char ch)
       Serial.print("Adjust LED #");
       Serial.print(iLED, DEC);
       Serial.println(", exit by pressing 'x'");
-      
+
       while(ch != 'x') {
         if(Serial.available()) {
           ch = Serial.read();
@@ -193,7 +193,7 @@ bool handleKeyInput(char ch)
       }
       Serial.println("... done");
       break;
-      
+
     default:
       return false;
   }
@@ -201,7 +201,7 @@ bool handleKeyInput(char ch)
 }
 
 //--------------------------------------------------------------------------------
-void printInfo() 
+void printInfo()
 {
   switch(Radio.state) {
     case PLAY_STATUS_PLAY:
@@ -237,7 +237,7 @@ void printInfo()
         Serial.print(Radio.qualityDAB, DEC);
         Serial.print(F(" (0..100)"));
         Serial.println();
-        
+
         if(Radio.progDABType < 0) {
           Serial.print(F("program type n/a"));
         }
@@ -268,7 +268,7 @@ void printInfo()
         }
       }
       break;
-  }    
+  }
 }
 
 //--------------------------------------------------------------------------------

@@ -17,10 +17,11 @@
 //--------------------------------------------------------------------------------
 // Global definitions
 //
-#define          SER_HOST           (*SerHostStream) 
-#define          SER_DEBUG_OUT      (*SerDebugStream) 
-#define          SER_MONKEY_RADIO   Serial1 
-#define          SER_DEBUG          Serial 
+#define          SER_HOST           (*SerHostStream)
+#define          SER_DEBUG_OUT      (*SerDebugStream)
+#define          SER_MONKEY_RADIO   Serial1
+#define          SER_DEBUG          Serial
+#define          GERMAN_TEXT
 
 //                                  0   -> TX0
 //                                  1   -> RX0
@@ -32,13 +33,13 @@
 #define          PIN_DIAL_VC        7
 //                                  8
 //                                  10
-#define          PIN_RELAY          11 
-#define          PIN_AMP_POWER      12 
+#define          PIN_RELAY          11
+#define          PIN_AMP_POWER      12
 #define          PIN_CAP_IN         A0
 #define          PIN_CAP_OUT        A1
 //                                  A2
 #define          PIN_DIAL_EXTEND    A3
-#define          PIN_DIAL_TON       A4    
+#define          PIN_DIAL_TON       A4
 #define          PIN_BUTTON_MW      A5
 #define          PIN_BUTTON_UKW     A6
 #define          PIN_BUTTON_TA      A7
@@ -60,7 +61,7 @@
 #define          LED_FLICKER_DI     10
 #define          LED_FLICKER_DT     40
 
-#define          RELAY_RADIO        LOW 
+#define          RELAY_RADIO        LOW
 #define          RELAY_AUX          HIGH
 
 #define          EEPROM_START       0
@@ -107,10 +108,18 @@
 #define          LAST_FSM_STATE             7
 
 char* FSMStr[LAST_FSM_STATE +1] = {
-  "undefined", "off", 
+  #ifdef GERMAN_TEXT
+  "Nicht definiert", "Aus",
+  "AUX", "DAB",
+  "Sendersuchlauf-Start", "Sendersuchlauf ...", "Sendersuchlauf fertig",
+  "Nicht implementiert"
+  #else
+  "undefined", "off",
   "playing AUX", "playing DAB",
   "autosearch start", "autosearch running", "autosearch done",
-  "not implemented"};
+  "not implemented"
+  #endif
+  };
 
 //--------------------------------------------------------------------------------
 // Global variables
@@ -123,31 +132,31 @@ Adafruit_SSD1306 Display(PIN_DISPLAY_RST);
 #endif
 
 typedef struct {
-  char           progDAB, progDABType, DABService; 
+  char           progDAB, progDABType, DABService;
   char           progName[MAX_TEXT_BUFFER], progAbbr[MAX_TEXT_BUFFER];
   char           mode, state, stereo, playMode;
   bool           isProgChanged, isMute;
   int            bitError, dataRate, qualityDAB;
   float          lastQualityDAB;
   char           signalStrength;  // DAB signal strength
-  char           volume;          // current volume  
+  char           volume;          // current volume
   String         RTC_timeDateStr; // current time and date as string
-} radio_state_t;              
+} radio_state_t;
 
 typedef struct {
   bool           isNew;           // has EEPROM never been written
-  char           progDAB;         // default DAB program index 
+  char           progDAB;         // default DAB program index
   char           volume;          // default software volume
   int            minCap, maxCap;  // minimum and maximum C [pF] of program dial
-  // ...  
+  // ...
   byte           h[COLOR_COUNT], s[COLOR_COUNT], v[COLOR_COUNT];
-} radio_config_t;                  
+} radio_config_t;
 
 typedef struct {
   uint16_t       x, y, color, bgrColor, size;
   bool           doWrap;
   String         text;
-} text_t;                  
+} text_t;
 
 // Represents an interface element, a button or different kinds of dials
 //   val       := current value of the element, with 0 or 1 for buttons and
@@ -158,9 +167,9 @@ typedef struct {
   uint8_t        pin, pin2, type;
   char           name[8];
   bool           rawState, state, lastState, readingState, highState;
-  int            readingVal, lastVal, val;  
+  int            readingVal, lastVal, val;
   bool           isChanged;
-  float          cap;  
+  float          cap;
   unsigned long  tLast;
 } control_t;
 
@@ -177,23 +186,23 @@ BBE_EQ_t         BBE_EQ;
 
 int              FSM_state, FSM_lastState;
 int              nCapBins;
-float            dCapBin;    
+float            dCapBin;
 bool             isControlChanged;
 
 control_t        Controls[CONTROL_COUNT] = {
-  {PIN_BUTTON_SPRACHE, 0,   CONTROL_BUTTON, "SPRACHE", 
-   LOW, LOW,  HIGH, LOW, LOW,  0,0,-1, false, 0.0, 0L}, 
+  {PIN_BUTTON_SPRACHE, 0,   CONTROL_BUTTON, "SPRACHE",
+   LOW, LOW,  HIGH, LOW, LOW,  0,0,-1, false, 0.0, 0L},
   {PIN_BUTTON_TA, 0,        CONTROL_BUTTON, "TA",
-   LOW, LOW,  HIGH, LOW, LOW,  0,0,-1, false, 0.0, 0L},  
-  {PIN_BUTTON_UKW, 0,       CONTROL_BUTTON, "UKW",  
-   LOW, HIGH, LOW,  LOW, HIGH, 0,0,-1, false, 0.0, 0L}, 
+   LOW, LOW,  HIGH, LOW, LOW,  0,0,-1, false, 0.0, 0L},
+  {PIN_BUTTON_UKW, 0,       CONTROL_BUTTON, "UKW",
+   LOW, HIGH, LOW,  LOW, HIGH, 0,0,-1, false, 0.0, 0L},
   {PIN_BUTTON_MW, 0,        CONTROL_BUTTON, "MW",
    LOW, LOW,  HIGH, LOW, LOW,  0,0,-1, false, 0.0, 0L},
-  {PIN_CAP_IN, PIN_CAP_OUT, CONTROL_DIAL_C, "SENDER", 
+  {PIN_CAP_IN, PIN_CAP_OUT, CONTROL_DIAL_C, "SENDER",
    LOW, LOW,  LOW,  LOW, LOW,  0,0,-1, false, 0.0, 0L},
-  {PIN_DIAL_TON, 0,         CONTROL_DIAL_R, "TON", 
+  {PIN_DIAL_TON, 0,         CONTROL_DIAL_R, "TON",
    LOW, LOW,  LOW,  LOW, LOW,  0,0,-1, false, 0.0, 0L}};
-   
+
 //--------------------------------------------------------------------------------
 //
 //--------------------------------------------------------------------------------
@@ -206,7 +215,7 @@ void initOtherHardware()
 }
 
 //--------------------------------------------------------------------------------
-void setup() 
+void setup()
 {
   // Initialize
   //
@@ -214,19 +223,19 @@ void setup()
   Radio.progName[0]    = 0;
   Radio.progAbbr[0]    = 0;
   Radio.state          = PLAY_STATUS_INVALID;
-  Radio.mode           = STREAM_MODE_DAB; 
-  Radio.stereo         = -1;   
+  Radio.mode           = STREAM_MODE_DAB;
+  Radio.stereo         = -1;
   Radio.playMode       = -1;
   Radio.isProgChanged  = false;
   Radio.bitError       = 0;
-  Radio.dataRate       = 0; 
+  Radio.dataRate       = 0;
   Radio.signalStrength = 0;
   Radio.volume         = 10;
   Radio.qualityDAB     = 0;
   Radio.lastQualityDAB = 50;
   Radio.DABService     = DAB_SERVICE_UNKNOWN;
   Radio.isMute         = false;
-  
+
   tLastUpdate          = millis();
   dirProg              = 1;
   iPrevProg            = 0;
@@ -237,8 +246,8 @@ void setup()
   BBE_EQ.BBEOn         = 2;
   BBE_EQ.EQMode        = EQ_MODE_JAZZ;
   BBE_EQ.BBELo         = 5;  // 0..24, 0~12dB, 0.5dB/step
-  BBE_EQ.BBEHi         = 0;  // 0..24, 0~12dB, 0.5dB/step 
-  BBE_EQ.BBECFreq      = 0;  // 0..1, 595Hz or 1000Hz  
+  BBE_EQ.BBEHi         = 0;  // 0..24, 0~12dB, 0.5dB/step
+  BBE_EQ.BBECFreq      = 0;  // 0..1, 595Hz or 1000Hz
   BBE_EQ.BBEMachFreq   = 60; // 60, 90, 120, 150Hz
   BBE_EQ.BBEMachGain   = 0;  // 0, 4, 8, 12dB
   BBE_EQ.BBEMachQ      = 1;  // 1 or 3
@@ -258,7 +267,7 @@ void setup()
   initLEDs();
   #ifdef USE_DISPLAY
   initDisplay();
-  #endif  
+  #endif
   initControls();
   // ...
 
@@ -267,26 +276,26 @@ void setup()
   SER_MONKEY_RADIO.begin(baudSerMonkeyRadio);
   SER_MONKEY_RADIO.setTimeout(tOutSerMonkeyRadio_ms);
 
-  SerHostStream  = &SER_MONKEY_RADIO;    
+  SerHostStream  = &SER_MONKEY_RADIO;
   SerDebugStream = &SER_DEBUG;
   monkeyRadio.setStream(&SER_HOST, &SER_DEBUG_OUT);
-  delay(100);  
+  delay(100);
 
   if(!monkeyRadio.openRadioPort(false)) {
     SER_DEBUG.println(F("ERROR: failed to open radio"));
   }
-  else {  
+  else {
     // Link to radio established
     //
     monkeyRadio.getTotalDABProgramsFromDB();
     if(monkeyRadio.getDABProgramCount() == 0) {
       // No DAB programs in database, start search ...
       //
-      monkeyRadio.DABAutoSearch(DAB_MIN_PROG, DAB_MAX_PROG);
+      monkeyRadio.DABAutoSearch(DAB_MIN_PROG, DAB_MAX_PROG, (displayFunc)displayMsg);
       monkeyRadio.getTotalDABProgramsFromDB();
     }
     monkeyRadio.setVolume(Radio.volume);
-    monkeyRadio.setBBEEQ(BBE_EQ);  
+    monkeyRadio.setBBEEQ(BBE_EQ);
     monkeyRadio.syncRTC(true);
 
     if(monkeyRadio.getDABProgramCount() > 0) {
@@ -303,7 +312,7 @@ void setup()
 
 //--------------------------------------------------------------------------------
 void loop() {
-  // Check if a command arrived via the terminal 
+  // Check if a command arrived via the terminal
   //
   if(Serial.available()) {
     ch = Serial.read();
@@ -316,13 +325,13 @@ void loop() {
   //
   updateControlStates();
   updateFSM();
-  
+
   // If program has changed, switch station ...
-  //  
+  //
   if(Radio.isProgChanged) {
     monkeyRadio.quiet(true);
 
-    // Check if selected index is an audio stream, if not, go to the next 
+    // Check if selected index is an audio stream, if not, go to the next
     // or stay if at the end of the range
     //
     nProg  = monkeyRadio.getDABProgramCount();
@@ -331,49 +340,49 @@ void loop() {
     failed = false;
     while(!failed && (res != DAB_SERVICE_DAB) && (res != DAB_SERVICE_DAB_PLUS)) {
       if(dirProg > 0) {
-        if(iProg < nProg-1) 
+        if(iProg < nProg-1)
           iProg++;
         else
           failed = true;
       }
       else {
-       if(iProg > 0) 
+       if(iProg > 0)
           iProg--;
         else
           failed = true;
       }
       res = monkeyRadio.getServCompType(iProg);
     }
-    if(!failed) 
+    if(!failed)
       Radio.progDAB = iProg;
     else {
       Radio.progDAB = iPrevProg;
     }
-    // Switch to new program 
+    // Switch to new program
     // (or stay with previous one, if there is no next one)
     //
-    monkeyRadio.playStream(STREAM_MODE_DAB, Radio.progDAB);      
-    Radio.state = monkeyRadio.getPlayStatus();  
-    flickerLED_Info(ID_COLOR_TUNING, LED_FLICKER_MIN, LED_FLICKER_MAX, LED_FLICKER_DI, LED_FLICKER_DT, true); 
+    monkeyRadio.playStream(STREAM_MODE_DAB, Radio.progDAB);
+    Radio.state = monkeyRadio.getPlayStatus();
+    flickerLED_Info(ID_COLOR_TUNING, LED_FLICKER_MIN, LED_FLICKER_MAX, LED_FLICKER_DI, LED_FLICKER_DT, true);
     while(Radio.state != PLAY_STATUS_PLAY) {
-      flickerLED_Info(ID_COLOR_TUNING, 0, 0, 0, 0, false); 
+      flickerLED_Info(ID_COLOR_TUNING, 0, 0, 0, 0, false);
       Radio.state = monkeyRadio.getPlayStatus();
     }
     monkeyRadio.quiet(false);
     tLastUpdate = 0;
-    #ifdef USE_DISPLAY      
+    #ifdef USE_DISPLAY
     displayClear();
-    #endif    
+    #endif
     Radio.isProgChanged = false;
   }
-  
+
   // Update radio info at a defined interval
   //
-  if(millis() > (tLastUpdate +RADIO_UPDATE_MS)) { 
-    updateStateInfo();    
-    #ifdef USE_DISPLAY  
+  if(millis() > (tLastUpdate +RADIO_UPDATE_MS)) {
+    updateStateInfo();
+    #ifdef USE_DISPLAY
     displayInfo();
-    #endif      
+    #endif
     tLastUpdate = millis();
   }
   // Delay main loop to allow hardware to keep up

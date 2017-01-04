@@ -6,7 +6,7 @@
 // history : 2016-10-08, created
 //
 //--------------------------------------------------------------------------------
-void updateStateInfo() 
+void updateStateInfo()
 {
   int v, q;
 
@@ -15,7 +15,7 @@ void updateStateInfo()
       // ...
       setLEDStatus_Info(ID_COLOR_AUX, -1, true);
       break;
-    
+
     case FSM_DAB_PLAY:
       monkeyRadio.quiet(true);
       Radio.state = monkeyRadio.getPlayStatus();
@@ -29,26 +29,26 @@ void updateStateInfo()
           Radio.playMode       = monkeyRadio.getPlayMode();
           Radio.dataRate       = monkeyRadio.getDataRate();
           Radio.progDABType    = monkeyRadio.getProgramType(-1);
-          if(!monkeyRadio.getProgramName(-1, 1, Radio.progName))  
+          if(!monkeyRadio.getProgramName(-1, 1, Radio.progName))
             Radio.progName[0]  = 0;
-          if(!monkeyRadio.getProgramName(-1, 0, Radio.progAbbr)) 
-            Radio.progAbbr[0]  = 0; 
+          if(!monkeyRadio.getProgramName(-1, 0, Radio.progAbbr))
+            Radio.progAbbr[0]  = 0;
           Radio.qualityDAB     = monkeyRadio.getDABSignalQuality();
           Radio.DABService     = monkeyRadio.getServCompType(Radio.progDAB);
-    
+
           // Update time
           //
           monkeyRadio.getRTC(&RTC_time);
           RTCTimeToTimeDateStr(DISPLAY_TIME_WSEC);
-    
+
           // Update signal quality indicator (info LED)
           //
           Radio.lastQualityDAB = (Radio.lastQualityDAB +Radio.qualityDAB)/2;
           v = map(int(Radio.lastQualityDAB), 0, 100, LED_INFO_MIN, LED_INFO_MAX);
           setLEDStatus_Info(ID_COLOR_PLAYING, v, true);
           break;
-          
-        default:  
+
+        default:
           setLEDStatus_Info(ID_COLOR_ERROR, -1, true);
       }
       monkeyRadio.quiet(false);
@@ -68,17 +68,24 @@ int  getAudioDABProgramCount()
   nAudio = 0;
   for(i=0; i<nProg; i+=1) {
     res  = monkeyRadio.getServCompType(i);
-    if((res == DAB_SERVICE_DAB) || (res == DAB_SERVICE_DAB_PLUS)) 
+    if((res == DAB_SERVICE_DAB) || (res == DAB_SERVICE_DAB_PLUS))
       nAudio += 1;
   }
   monkeyRadio.quiet(false);
-  
+
   SER_DEBUG.print(nAudio, DEC);
   SER_DEBUG.print(F(" of "));
   SER_DEBUG.print(nProg, DEC);
   SER_DEBUG.println(F(" DAB programs are audio"));
 
-  return nAudio;    
+  return nAudio;
+}
+
+//--------------------------------------------------------------------------------
+bool runDABAutoSearch() 
+{
+  // ...
+  return true;
 }
 
 //--------------------------------------------------------------------------------

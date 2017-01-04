@@ -10,7 +10,7 @@ void initControls()
 {
   SER_DEBUG.print(F("Initializing controls ..."));
 
-  // Set all analog inputs by default as floating to prevent them to interfer 
+  // Set all analog inputs by default as floating to prevent them to interfer
   // with the capacitance measurements
   //
   for(byte j=A0; j<A7; j++) {
@@ -27,13 +27,13 @@ void initControls()
         pinMode(Controls[j].pin, INPUT_PULLUP);
         delay(10);
         Controls[j].rawState   = digitalRead(Controls[j].pin);
-        Controls[j].lastState  = Controls[j].rawState; 
-        Controls[j].state      = (Controls[j].rawState == Controls[j].highState); 
-        Controls[j].val        = int(Controls[j].state); 
+        Controls[j].lastState  = Controls[j].rawState;
+        Controls[j].state      = (Controls[j].rawState == Controls[j].highState);
+        Controls[j].val        = int(Controls[j].state);
         Controls[j].tLast      = millis();
-        Controls[j].isChanged  = true; 
+        Controls[j].isChanged  = true;
         break;
-        
+
       case CONTROL_DIAL_C :
         pinMode(Controls[j].pin2, OUTPUT);
         pinMode(Controls[j].pin, OUTPUT);
@@ -43,42 +43,42 @@ void initControls()
         Controls[j].readingVal = constrain(Controls[j].readingVal, 0, nCapBins-1);
         Controls[j].val        = Controls[j].readingVal;
         Controls[j].tLast      = millis();
-        Controls[j].isChanged  = true; 
+        Controls[j].isChanged  = true;
         break;
 
       case CONTROL_DIAL_R :
         Controls[j].readingVal = readDialVoltage(Controls[j].pin);
         Controls[j].val        = Controls[j].readingVal;
         Controls[j].tLast      = millis();
-        Controls[j].isChanged  = true; 
+        Controls[j].isChanged  = true;
         break;
     }
   }
   // Handle interactions between hardware controls
   //
   correctControlStates();
-  
+
   SER_DEBUG.println(F("  done"));
 }
 
 //--------------------------------------------------------------------------------
 void updateControlStates()
-{  
-  // Check for robust changes of the controls' state 
+{
+  // Check for robust changes of the controls' state
   // (debounce buttons and denoise dials)
   //
   for(int j=0; j<CONTROL_COUNT; j++) {
     Controls[j].isChanged = false;
-    
+
     switch(Controls[j].type) {
       case CONTROL_BUTTON :
-        // A button 
+        // A button
         //
         Controls[j].readingState = digitalRead(Controls[j].pin);
         if(Controls[j].readingState != Controls[j].lastState) {
           Controls[j].tLast = millis();
         }
-        if((millis() -Controls[j].tLast) > BUTTON_DEBOUNCE_MS) {  
+        if((millis() -Controls[j].tLast) > BUTTON_DEBOUNCE_MS) {
           Controls[j].isChanged  = (Controls[j].readingState != Controls[j].rawState);
           if(Controls[j].isChanged) {
             Controls[j].rawState = Controls[j].readingState;
@@ -86,7 +86,7 @@ void updateControlStates()
             Controls[j].val      = int(Controls[j].state);
           }
         }
-        Controls[j].lastState = Controls[j].readingState;   
+        Controls[j].lastState = Controls[j].readingState;
         break;
 
       case CONTROL_DIAL_C :
@@ -99,13 +99,13 @@ void updateControlStates()
         if(Controls[j].readingVal != Controls[j].lastVal) {
           Controls[j].tLast = millis();
         }
-        if((millis() -Controls[j].tLast) > DIAL_C_DENOISE_MS) {   
+        if((millis() -Controls[j].tLast) > DIAL_C_DENOISE_MS) {
           Controls[j].isChanged = (Controls[j].readingVal != Controls[j].val);
           if(Controls[j].isChanged) {
             Controls[j].val = Controls[j].readingVal;
           }
         }
-        Controls[j].lastVal = Controls[j].readingVal;   
+        Controls[j].lastVal = Controls[j].readingVal;
         break;
 
       case CONTROL_DIAL_R :
@@ -115,13 +115,13 @@ void updateControlStates()
         if(Controls[j].readingVal != Controls[j].lastVal) {
           Controls[j].tLast = millis();
         }
-        if((millis() -Controls[j].tLast) > DIAL_R_DENOISE_MS) {   
+        if((millis() -Controls[j].tLast) > DIAL_R_DENOISE_MS) {
           Controls[j].isChanged = (Controls[j].readingVal != Controls[j].val);
           if(Controls[j].isChanged) {
             Controls[j].val = Controls[j].readingVal;
           }
         }
-        Controls[j].lastVal = Controls[j].readingVal;   
+        Controls[j].lastVal = Controls[j].readingVal;
         break;
     }
   }
@@ -133,7 +133,7 @@ void updateControlStates()
   //
   isControlChanged = false;
   for(int j=0; j<CONTROL_COUNT; j++) {
-    if(Controls[j].isChanged) 
+    if(Controls[j].isChanged)
       isControlChanged = true;
   }
   if(isControlChanged) {
@@ -154,7 +154,7 @@ void updateProgramDialParams()
   // available number of programs
   //
   nCapBins = getAudioDABProgramCount();
-  dCapBin  = (float)(Conf.maxCap -Conf.minCap)/nCapBins; 
+  dCapBin  = (float)(Conf.maxCap -Conf.minCap)/nCapBins;
 
   SER_DEBUG.print(F("Program dial capacitance = "));
   SER_DEBUG.print(Conf.minCap, DEC);
@@ -177,7 +177,7 @@ void correctControlStates()
   if(Controls[BUTTON_TA].isChanged || Controls[BUTTON_MW].isChanged) {
     state = (!Controls[BUTTON_TA].state && !Controls[BUTTON_MW].state);
     Controls[BUTTON_UKW].state     = state;
-    Controls[BUTTON_UKW].lastState = state;   
+    Controls[BUTTON_UKW].lastState = state;
     Controls[BUTTON_UKW].val       = int(state);
     Controls[BUTTON_UKW].isChanged = true;
   }
@@ -187,7 +187,7 @@ void correctControlStates()
 //
 //--------------------------------------------------------------------------------
 void updateFSM()
-{  
+{
   int j;
 
   FSM_lastState = FSM_state;
@@ -199,36 +199,41 @@ void updateFSM()
     FSM_state = FSM_AUX;
     switchRelayToSource(RELAY_AUX);
   }
-  else 
-  if(Controls[BUTTON_MW].state) {    
-    // Play current DAB program
-    //
-    FSM_state = FSM_DAB_PLAY;
-    switchRelayToSource(RELAY_RADIO);
+  else
+  if(Controls[BUTTON_MW].state) {
+    if(!Controls[BUTTON_SPRACHE].state) {
+      // Play current DAB program
+      //
+      FSM_state = FSM_DAB_PLAY;
+      switchRelayToSource(RELAY_RADIO);
+    }
+    else {
+      // Initiate autosearch ...
+      //
+      FSM_state = FSM_DAB_AUTOSEARCH;
+      if(runDABAutoSearch())
+        FSM_state = FSM_DAB_PLAY;
+      else {
+        FSM_state = FSM_DAB_AUTOSEARCH_FAILED;
+        // ...
+      }
+    }
   }
   else {
-//if(!Controls[BUTTON_TA].state && !Controls[BUTTON_MW].state && Controls[BUTTON_UKW].state) {
     // Not yet implemented
     //
     FSM_state = FSM_NOT_IMPLEMENTED;
   }
 
-// ***************
-// TODO
-//  Controls[BUTTON_SPRACHE].state
-//  Controls[BUTTON_UKW].state
-// FSM_state = FSM_DAB_AUTOSEARCH_START;
-// ***************  
-
-  // Check if program dial has changed and alter program 
+  // Check if program dial has changed and alter program
   // accordingly when in DAB play mode
   //
   if(Controls[DIAL_PROGRAM].isChanged) {
-//if((FSM_state == FSM_DAB_PLAY) && Controls[DIAL_PROGRAM].isChanged) {    
+//if((FSM_state == FSM_DAB_PLAY) && Controls[DIAL_PROGRAM].isChanged) {
     iPrevProg = Radio.progDAB;
     Radio.progDAB = Controls[DIAL_PROGRAM].val;
     Radio.isProgChanged = true;
-  }  
+  }
 
   // If changed, print state name to log
   //

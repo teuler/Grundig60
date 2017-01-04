@@ -101,22 +101,21 @@
 #define          FSM_OFF                    1
 #define          FSM_AUX                    2
 #define          FSM_DAB_PLAY               3
-#define          FSM_DAB_AUTOSEARCH_START   4
-#define          FSM_DAB_AUTOSEARCH_RUNNING 5
-#define          FSM_DAB_AUTOSEARCH_DONE    6
-#define          FSM_NOT_IMPLEMENTED        7
-#define          LAST_FSM_STATE             7
+#define          FSM_DAB_AUTOSEARCH         4
+#define          FSM_DAB_AUTOSEARCH_FAILED  5
+#define          FSM_NOT_IMPLEMENTED        6
+#define          LAST_FSM_STATE             6
 
 char* FSMStr[LAST_FSM_STATE +1] = {
   #ifdef GERMAN_TEXT
   "Nicht definiert", "Aus",
   "AUX", "DAB",
-  "Sendersuchlauf-Start", "Sendersuchlauf ...", "Sendersuchlauf fertig",
+  "Sendersuchlauf ...", "Sendersuchlauf gescheitert",
   "Nicht implementiert"
   #else
   "undefined", "off",
   "playing AUX", "playing DAB",
-  "autosearch start", "autosearch running", "autosearch done",
+  "autosearch running", "autosearch failed",
   "not implemented"
   #endif
   };
@@ -188,6 +187,7 @@ int              FSM_state, FSM_lastState;
 int              nCapBins;
 float            dCapBin;
 bool             isControlChanged;
+bool             isDisplayOn;
 
 control_t        Controls[CONTROL_COUNT] = {
   {PIN_BUTTON_SPRACHE, 0,   CONTROL_BUTTON, "SPRACHE",
@@ -242,6 +242,7 @@ void setup()
   FSM_state            = FSM_UNDEFINED;
   FSM_lastState        = FSM_state;
   isControlChanged     = false;
+  isDisplayOn          = true;
 
   BBE_EQ.BBEOn         = 2;
   BBE_EQ.EQMode        = EQ_MODE_JAZZ;

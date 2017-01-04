@@ -51,6 +51,10 @@ void displayInfo()
   // Clear display buffer
   //
   Display.clearDisplay();
+  if(isDisplayOn) {
+    Display.display();
+    return;
+  }
 
   // Display time
   //
@@ -159,7 +163,7 @@ void displayInfo()
 }
 
 //--------------------------------------------------------------------------------
-void displayMsg(String sHeader, String sMsg)
+void displayMsg(String sHeader, String sMsg, String sDetail)
 {
   text_t   txt;
   uint16_t dh;
@@ -178,6 +182,10 @@ void displayMsg(String sHeader, String sMsg)
   // Clear display buffer
   //
   Display.clearDisplay();
+  if(isDisplayOn) {
+    Display.display();
+    return;
+  }  
 
   // Skip line for time
   //
@@ -186,8 +194,12 @@ void displayMsg(String sHeader, String sMsg)
   txt.text  = sHeader;
   displayTextXY(&txt);
   txt.y     += dh;
-
-  // ...
+  txt.text  = sMsg;
+  displayTextXY(&txt);
+  txt.y     += dh;
+  txt.text  = sDetail;
+  displayTextXY(&txt);
+  txt.y     += dh;
 
   // Display buffer
   //

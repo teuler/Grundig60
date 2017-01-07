@@ -51,7 +51,7 @@ void displayInfo()
   // Clear display buffer
   //
   Display.clearDisplay();
-  if(isDisplayOn) {
+  if(!isDisplayOn) {
     Display.display();
     return;
   }
@@ -182,7 +182,7 @@ void displayMsg(String sHeader, String sMsg, String sDetail)
   // Clear display buffer
   //
   Display.clearDisplay();
-  if(isDisplayOn) {
+  if(!isDisplayOn) {
     Display.display();
     return;
   }  

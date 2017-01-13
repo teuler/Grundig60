@@ -6,6 +6,7 @@
 // history : 2016-10-08, created
 //
 //--------------------------------------------------------------------------------
+#define  GERMAN_TEXT
 #define  USE_HSV
 #include <WS2812.h>
 #include <EEPROM.h>
@@ -21,7 +22,6 @@
 #define          SER_DEBUG_OUT      (*SerDebugStream)
 #define          SER_MONKEY_RADIO   Serial1
 #define          SER_DEBUG          Serial
-#define          GERMAN_TEXT
 
 //                                  0   -> TX0
 //                                  1   -> RX0
@@ -93,6 +93,9 @@
 
 #define          USE_DISPLAY
 #define          DISPLAY_TIME_WSEC  false
+
+#define          COUNTDOWN_DIV      10
+#define          COUNTDOWN_MAX_S    5
 
 //--------------------------------------------------------------------------------
 // Finite stae machine definitions
@@ -188,6 +191,7 @@ int              nCapBins;
 float            dCapBin;
 bool             isControlChanged;
 bool             isDisplayOn;
+bool             lastBusy;
 
 control_t        Controls[CONTROL_COUNT] = {
   {PIN_BUTTON_SPRACHE, 0,   CONTROL_BUTTON, "SPRACHE",
@@ -243,6 +247,7 @@ void setup()
   FSM_lastState        = FSM_state;
   isControlChanged     = false;
   isDisplayOn          = true;
+  lastBusy             = true;
 
   BBE_EQ.BBEOn         = 2;
   BBE_EQ.EQMode        = EQ_MODE_JAZZ;

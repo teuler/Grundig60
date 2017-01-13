@@ -21,7 +21,7 @@ void setLEDStatus_Info(byte state, int intens, bool doSync)
   _setLEDStatus(ID_LED_INFO2, state, intens, doSync);
 }
 
-void flickerLED_Info(byte color, int i0, int i1, int di, int dt, bool doReset) 
+void flickerLED_Info(byte color, int i0, int i1, int di, int dt, bool doReset)
 {
   _flickerLED(ID_LED_INFO,  color, i0, i1, di, dt, doReset);
   _flickerLED(ID_LED_INFO2, color, i0, i1, di, dt, doReset);
@@ -33,18 +33,18 @@ void flickerLED_Info(byte color, int i0, int i1, int di, int dt, bool doReset)
 void _setLEDStatus(byte index, byte state, int intens, bool doSync)
 {
   byte v;
-  
+
   if((index >= 0) && (index < LED_COUNT)) {
     if(intens < 0)
       v = Conf.v[state];
     else
-      v = byte(constrain(intens, 0, 255));  
+      v = byte(constrain(intens, 0, 255));
     _setLEDColorHSV(index, Conf.h[state], Conf.s[state], v, doSync);
   }
 }
 
 //--------------------------------------------------------------------------------
-void _flickerLED(byte index, byte color, int i0, int i1, int di, int dt, bool doReset) 
+void _flickerLED(byte index, byte color, int i0, int i1, int di, int dt, bool doReset)
 {
   static int _i0, _i1, _di, _dt, _i;
 
@@ -60,15 +60,15 @@ void _flickerLED(byte index, byte color, int i0, int i1, int di, int dt, bool do
     if((_i > _i1) || (_i < _i0))
       _di = -_di;
   }
-  _setLEDStatus(index, ID_COLOR_TUNING, _i, true);
-  if(!doReset) 
+  _setLEDStatus(index, color, _i, true);
+  if(!doReset)
     delay(_dt);
 }
 
 //--------------------------------------------------------------------------------
 //
 //--------------------------------------------------------------------------------
-void _setLEDColorHSV(byte index, byte hue, byte sat, byte val, bool doSync) 
+void _setLEDColorHSV(byte index, byte hue, byte sat, byte val, bool doSync)
 {
   cRGB rgb;
   rgb.SetHSV(hue, sat, val);

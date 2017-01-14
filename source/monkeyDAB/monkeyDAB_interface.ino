@@ -100,7 +100,8 @@ void updateControlStates()
           Controls[j].tLast = millis();
         }
         if((millis() -Controls[j].tLast) > DIAL_C_DENOISE_MS) {
-          Controls[j].isChanged = (Controls[j].readingVal != Controls[j].val);
+        //Controls[j].isChanged = (Controls[j].readingVal != Controls[j].val);
+          Controls[j].isChanged = (abs(Controls[j].readingVal -Controls[j].val) > 1);
           if(Controls[j].isChanged) {
             Controls[j].val = Controls[j].readingVal;
           }

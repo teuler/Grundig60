@@ -4,7 +4,7 @@
 //           display-related routines
 // author  : Thomas Euler
 // history : 2016-10-09, created
-//           2016-12-24, changed to use OLED 128x32 I2C display
+//           2016-12-24, changed to use OLED 128x64 I2C display
 //
 //--------------------------------------------------------------------------------
 #define LOGO16_GLCD_HEIGHT 16

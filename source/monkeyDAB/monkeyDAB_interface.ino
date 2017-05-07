@@ -4,6 +4,7 @@
 //           hardware interface, such as buttons and dials
 // author  : Thomas Euler
 // history : 2016-11-03, created
+//           2017-05-07, tone dial setting to "clamp" station
 //
 //--------------------------------------------------------------------------------
 void initControls()
@@ -236,7 +237,10 @@ void updateFSM()
   // Check if program dial has changed and alter program
   // accordingly when in DAB play mode
   //
-  if(Controls[DIAL_PROGRAM].isChanged) {
+  if((Controls[DIAL_PROGRAM].isChanged) &&
+     (Controls[DIAL_TON].val < DIAL_TON_THRES))
+  {
+//if(Controls[DIAL_PROGRAM].isChanged) {
 //if((FSM_state == FSM_DAB_PLAY) && Controls[DIAL_PROGRAM].isChanged) {
     iPrevProg = Radio.progDAB;
     Radio.progDAB = Controls[DIAL_PROGRAM].val;

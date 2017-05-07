@@ -4,6 +4,7 @@
 //           DAB radio based on monkey DAB board
 // author  : Thomas Euler
 // history : 2016-10-08, created
+//           2017-05-07, tone dial setting to "clamp" station
 //
 //--------------------------------------------------------------------------------
 #define  GERMAN_TEXT
@@ -78,6 +79,8 @@
 #define          DIAL_PROGRAM       4
 #define          DIAL_TON           5
 #define          CONTROL_COUNT      6
+
+#define          DIAL_TON_THRES     20
 
 #define          BUTTON_DEBOUNCE_MS 100L
 #define          DIAL_C_DENOISE_MS  5L

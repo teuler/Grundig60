@@ -5,6 +5,8 @@
 // author  : Thomas Euler
 // history : 2016-10-08, created
 //           2017-05-07, tone dial setting to "clamp" station
+//           2017-07-15, check for station "clamp" only after checking for the 
+//                       selected station at start-up
 //
 //--------------------------------------------------------------------------------
 #define  GERMAN_TEXT
@@ -195,6 +197,7 @@ float            dCapBin;
 bool             isControlChanged;
 bool             isDisplayOn;
 bool             lastBusy;
+bool             isProgDialLocked, isFirstUpdateFSM;
 
 control_t        Controls[CONTROL_COUNT] = {
   {PIN_BUTTON_SPRACHE, 0,   CONTROL_BUTTON, "SPRACHE",
@@ -251,6 +254,8 @@ void setup()
   isControlChanged     = false;
   isDisplayOn          = true;
   lastBusy             = true;
+  isProgDialLocked     = false;
+  isFirstUpdateFSM     = true;
 
   BBE_EQ.BBEOn         = 2;
   BBE_EQ.EQMode        = EQ_MODE_JAZZ;

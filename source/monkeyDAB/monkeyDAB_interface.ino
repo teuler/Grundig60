@@ -197,7 +197,7 @@ bool checkSpracheKey()
 //--------------------------------------------------------------------------------
 void updateFSM()
 {
-  int j;
+  int j, k;
 
   FSM_lastState = FSM_state;
   FSM_state     = FSM_UNDEFINED;
@@ -234,18 +234,30 @@ void updateFSM()
     FSM_state = FSM_NOT_IMPLEMENTED;
   }
 
+  if(isFirstUpdateFSM) {
+    k = DIAL_PROGRAM;
+    Controls[k].isChanged  = true;
+    Controls[k].cap        = readDialCapacitance(Controls[k].pin, Controls[k].pin2);
+    Controls[k].readingVal = (Controls[k].cap -(float)Conf.minCap) /dCapBin;
+    Controls[k].readingVal = int(constrain(Controls[k].readingVal, 0, nCapBins-1));
+    Controls[k].val        = Controls[k].readingVal;
+    Controls[k].lastVal    = Controls[k].readingVal;
+    isFirstUpdateFSM = false;
+  }  
   // Check if program dial has changed and alter program
   // accordingly when in DAB play mode
   //
-  if((Controls[DIAL_PROGRAM].isChanged) &&
+  if((Controls[DIAL_PROGRAM].isChanged) && !isProgDialLocked) {
+/*if((Controls[DIAL_PROGRAM].isChanged) && 
      (Controls[DIAL_TON].val < DIAL_TON_THRES))
-  {
+  {*/
 //if(Controls[DIAL_PROGRAM].isChanged) {
 //if((FSM_state == FSM_DAB_PLAY) && Controls[DIAL_PROGRAM].isChanged) {
     iPrevProg = Radio.progDAB;
     Radio.progDAB = Controls[DIAL_PROGRAM].val;
     Radio.isProgChanged = true;
   }
+  isProgDialLocked = (Controls[DIAL_TON].val >= DIAL_TON_THRES);
 
   // If changed, print state name to log
   //

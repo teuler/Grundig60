@@ -102,6 +102,8 @@
 #define          COUNTDOWN_DIV      10
 #define          COUNTDOWN_MAX_S    5
 
+#define          MAX_DAB_PROGS      64
+
 //--------------------------------------------------------------------------------
 // Finite stae machine definitions
 //
@@ -193,7 +195,7 @@ BBE_EQ_t         BBE_EQ;
 
 int              FSM_state, FSM_lastState;
 int              nCapBins;
-float            dCapBin;
+//float          dCapBin;
 bool             isControlChanged;
 bool             isDisplayOn;
 bool             lastBusy;
@@ -212,6 +214,14 @@ control_t        Controls[CONTROL_COUNT] = {
    LOW, LOW,  LOW,  LOW, LOW,  0,0,-1, false, 0.0, 0L},
   {PIN_DIAL_TON, 0,         CONTROL_DIAL_R, "TON",
    LOW, LOW,  LOW,  LOW, LOW,  0,0,-1, false, 0.0, 0L}};
+
+const int        dBordMin  = 1;
+const int        nBordDef  = 15;
+const int        nTrials   = 50;
+const float      lambDef   = 0.2;
+const float      euler     = 2.71828;
+
+int              ProgBorders[MAX_DAB_PROGS];
 
 //--------------------------------------------------------------------------------
 //

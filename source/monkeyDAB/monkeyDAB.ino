@@ -185,7 +185,15 @@ typedef struct {
 
 radio_state_t    Radio;
 radio_config_t   Conf;
+
 RTC_time_t       RTC_time;
+/*
+typedef struct {
+  byte            second, minute, hour, day, month, year;
+  bool            isOk;
+} RTC_time_t;
+*/
+
 char             ch;
 int              res, nProg, iProg, iPrevProg, dirProg;
 unsigned long    tLastUpdate;
@@ -199,6 +207,7 @@ int              nCapBins;
 bool             isControlChanged;
 bool             isDisplayOn;
 bool             lastBusy;
+bool             isMutedByUser;
 bool             isProgDialLocked, isFirstUpdateFSM;
 
 control_t        Controls[CONTROL_COUNT] = {
@@ -215,6 +224,10 @@ control_t        Controls[CONTROL_COUNT] = {
   {PIN_DIAL_TON, 0,         CONTROL_DIAL_R, "TON",
    LOW, LOW,  LOW,  LOW, LOW,  0,0,-1, false, 0.0, 0L}};
 
+//--------------------------------------------------------------------------------
+// Constants and variables related to arranging DAB programs across the 
+// (capacitance) range of the station dial 
+//
 const int        dBordMin  = 1;
 const int        nBordDef  = 15;
 const int        nTrials   = 50;
@@ -266,6 +279,7 @@ void setup()
   lastBusy             = true;
   isProgDialLocked     = false;
   isFirstUpdateFSM     = true;
+  isMutedByUser        = false;
 
   BBE_EQ.BBEOn         = 2;
   BBE_EQ.EQMode        = EQ_MODE_JAZZ;
@@ -398,6 +412,26 @@ void loop() {
     displayClear();
     #endif
     Radio.isProgChanged = false;
+  }
+
+  // If muted by user, check if full or half hour is coming up to unmute
+  //
+  if(isMutedByUser) {
+    if(!RTC_time.isOk) {
+      // Unmute now as the time seems not to be available
+      //
+      // ...
+    }
+    else {
+      // Check time ...
+      //
+      /*
+      typedef struct {
+        byte            second, minute, hour, day, month, year;
+        bool            isOk;
+      } RTC_time_t;
+      */
+    }
   }
 
   // Update radio info at a defined interval

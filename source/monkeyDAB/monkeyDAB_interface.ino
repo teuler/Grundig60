@@ -142,6 +142,8 @@ void updateControlStates()
     if(Controls[j].isChanged)
       isControlChanged = true;
   }
+
+  #ifdef LOG_INTERF_CHANGES
   if(isControlChanged) {
     for(int j=0; j<CONTROL_COUNT; j++) {
       SER_DEBUG.print(Controls[j].name);
@@ -151,6 +153,7 @@ void updateControlStates()
     }
     SER_DEBUG.println();
   }
+  #endif  
 }
 
 //--------------------------------------------------------------------------------
@@ -202,7 +205,7 @@ bool checkSpracheKey()
 //--------------------------------------------------------------------------------
 void updateFSM()
 {
-  int j, k;
+  int  j, k;
 
   FSM_lastState = FSM_state;
   FSM_state     = FSM_UNDEFINED;
@@ -263,7 +266,17 @@ void updateFSM()
     Radio.progDAB = Controls[DIAL_PROGRAM].val;
     Radio.isProgChanged = true;
   }
-  isProgDialLocked = (Controls[DIAL_TON].val >= DIAL_TON_THRES);
+  isProgDialLocked = (Controls[DIAL_TON].val > DIAL_TON_THRES_1);
+  isCommercialMute = (Controls[DIAL_TON].val > DIAL_TON_THRES_2);
+  if(isCommercialMute && !isMutedByUser && !didUnmuteOnTime) {
+    isMutedByUser   = true;
+    didUnmuteOnTime = false;
+    SER_DEBUG.println("COMMERICAL MUTE STARTED");
+  }
+  if(!isCommercialMute && isMutedByUser){
+    doUserUnmute  = true;
+    isMutedByUser = false;
+  }
 
   // If changed, print state name to log
   //
@@ -339,11 +352,12 @@ void calcProgBins(int nProg, int cMin, int cMax)
     if(!isReady) {
       lamb   *= 0.9;
       n      -= 1; 
-      isReady = (n <= 0);
-      
+      isReady = (n <= 0);  
+      /*
       SER_DEBUG.print(F("lamb="));
       SER_DEBUG.print(lamb, DEC);
       SER_DEBUG.println();
+      */
     } 
   }
   while(!isReady);
@@ -373,6 +387,7 @@ int getProgFromBins(int nProg, int cap)
   //
   for(int j=1; j<=nProg; j+=1) {
     if(cap <= ProgBorders[j]) {
+      #ifdef LOG_CAP_TO_PROG
       SER_DEBUG.print(cap, DEC);
       SER_DEBUG.print(F("-> channel "));
       SER_DEBUG.print(j-1, DEC);
@@ -380,6 +395,7 @@ int getProgFromBins(int nProg, int cap)
       SER_DEBUG.print(nProg, DEC);
       SER_DEBUG.print(F(" programs"));
       SER_DEBUG.println();
+      #endif
       return j-1;
     }
   }

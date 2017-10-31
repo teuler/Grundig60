@@ -9,50 +9,50 @@
 const char*      ShrtDayOfWeekStr[]= {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"};
 
 //--------------------------------------------------------------------------------
-void RTCTimeToTimeDateStr(bool withSecs) 
+void RTCTimeToTimeDateStr(RTC_time_t t, String& timeDateStr, bool withSecs) 
 {
   int  d;
 
-  Radio.RTC_timeDateStr = "";  
+  timeDateStr = "";  
 
-  if(RTC_time.isOk) {
+  if(t.isOk) {
     // Convert data to string
     //
-    d = findDayOfWeek(RTC_time.day, RTC_time.month, RTC_time.year +2000);
+    d = findDayOfWeek(t.day, t.month, t.year +2000);
     if((d < 0) || (d > 6))
-      Radio.RTC_timeDateStr += "n/a";
+      timeDateStr += "n/a";
     else
-      Radio.RTC_timeDateStr  = ShrtDayOfWeekStr[d];
-    Radio.RTC_timeDateStr   += " ";  
-    Radio.RTC_timeDateStr   += int(RTC_time.day);
-    Radio.RTC_timeDateStr   += ".";
-    Radio.RTC_timeDateStr   += int(RTC_time.month);  
-    Radio.RTC_timeDateStr   += ".";
-    Radio.RTC_timeDateStr   += RTC_time.year; // +2000;    
-    Radio.RTC_timeDateStr   += " ";
+      timeDateStr  = ShrtDayOfWeekStr[d];
+    timeDateStr   += " ";  
+    timeDateStr   += int(t.day);
+    timeDateStr   += ".";
+    timeDateStr   += int(t.month);  
+    timeDateStr   += ".";
+    timeDateStr   += t.year; // +2000;    
+    timeDateStr   += " ";
     
     // Add time to string
     //
-    if(RTC_time.hour < 10) {
-      Radio.RTC_timeDateStr += "0";
+    if(t.hour < 10) {
+      timeDateStr += "0";
     }  
-    Radio.RTC_timeDateStr   += int(RTC_time.hour);      
-    if(RTC_time.minute < 10) {
-      Radio.RTC_timeDateStr += ":0";
+    timeDateStr   += int(t.hour);      
+    if(t.minute < 10) {
+      timeDateStr += ":0";
     }  
     else {
-     Radio.RTC_timeDateStr  += ":";    
+      timeDateStr += ":";    
     }  
-    Radio.RTC_timeDateStr   += int(RTC_time.minute);      
+    timeDateStr   += int(t.minute);      
 
     if(withSecs) {
-      if(RTC_time.second < 10) {
-        Radio.RTC_timeDateStr += ":0";
+      if(t.second < 10) {
+        timeDateStr += ":0";
       }  
       else {
-        Radio.RTC_timeDateStr += ":";    
+        timeDateStr += ":";    
       }  
-      Radio.RTC_timeDateStr   += int(RTC_time.second);      
+      timeDateStr   += int(t.second);      
     }
   }  
 }  
@@ -79,6 +79,36 @@ int findDayOfWeek(long d, int m, int y)
     d += month[i];
   }
   return (d % 7);
+}
+
+//--------------------------------------------------------------------------------
+void getNextFullOrHalfHour(RTC_time_t* t)
+{
+  if((*t).minute >= 30) {
+    if((*t).hour < 23) 
+      (*t).hour += 1;
+    else
+      (*t).hour  = 0;
+    (*t).minute  = 0;
+  }
+  else {
+    (*t).minute  = 30;
+  }
+  (*t).second  = 0;
+}
+
+//--------------------------------------------------------------------------------
+bool isItTime(RTC_time_t* t0, RTC_time_t* t1)
+{
+  if(t1->minute == 0) {
+    if(t1->hour <= 23) 
+      return (t0->hour == t1->hour) && (t0->minute < 5);
+    else
+      return (t0->hour == 0) && (t0->minute < 5);
+  }
+  else {
+    return (t0->minute >= 30);
+  }
 }
 
 //--------------------------------------------------------------------------------

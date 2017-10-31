@@ -59,10 +59,22 @@ void displayInfo()
   // Display time
   //
   if(RTC_time.isOk) {
-    txt.text = Radio.RTC_timeDateStr;
+    txt.text = Radio.RTC_timeDateStr +" "; //17
+    if(isProgDialLocked) 
+      txt.text += "L";
+    else 
+      txt.text += "_";
+    if(isCommercialMute) 
+      txt.text += "C";
+    else 
+      txt.text += "_";
+    if(isMutedByUser) 
+      txt.text += "M";
+    else 
+      txt.text += "_";
   }
   else {
-    txt.text = F("Warte auf Uhrzeit ...");
+    txt.text = F("Warte auf Uhrzeit ... ");
   }
   displayTextXY(&txt);
   txt.y += dh;

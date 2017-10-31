@@ -26,6 +26,9 @@
 #define          SER_MONKEY_RADIO   Serial1
 #define          SER_DEBUG          Serial
 
+//#define        LOG_INTERF_CHANGES 
+//#define        LOG_CAP_TO_PROG    
+
 //                                  0   -> TX0
 //                                  1   -> RX0
 #define          PIN_LED            2
@@ -82,7 +85,8 @@
 #define          DIAL_TON           5
 #define          CONTROL_COUNT      6
 
-#define          DIAL_TON_THRES     20
+#define          DIAL_TON_THRES_1   7
+#define          DIAL_TON_THRES_2   20
 
 #define          BUTTON_DEBOUNCE_MS 100L
 #define          DIAL_C_DENOISE_MS  5L
@@ -186,7 +190,7 @@ typedef struct {
 radio_state_t    Radio;
 radio_config_t   Conf;
 
-RTC_time_t       RTC_time;
+RTC_time_t       RTC_time, RTC_time1;
 /*
 typedef struct {
   byte            second, minute, hour, day, month, year;
@@ -195,6 +199,7 @@ typedef struct {
 */
 
 char             ch;
+String           sTemp;
 int              res, nProg, iProg, iPrevProg, dirProg;
 unsigned long    tLastUpdate;
 bool             failed;
@@ -207,8 +212,8 @@ int              nCapBins;
 bool             isControlChanged;
 bool             isDisplayOn;
 bool             lastBusy;
-bool             isMutedByUser;
-bool             isProgDialLocked, isFirstUpdateFSM;
+bool             isMutedByUser, doUserUnmute, didUnmuteOnTime;
+bool             isProgDialLocked, isFirstUpdateFSM, isCommercialMute;
 
 control_t        Controls[CONTROL_COUNT] = {
   {PIN_BUTTON_SPRACHE, 0,   CONTROL_BUTTON, "SPRACHE",
@@ -280,6 +285,8 @@ void setup()
   isProgDialLocked     = false;
   isFirstUpdateFSM     = true;
   isMutedByUser        = false;
+  doUserUnmute         = false;
+  didUnmuteOnTime      = false;
 
   BBE_EQ.BBEOn         = 2;
   BBE_EQ.EQMode        = EQ_MODE_JAZZ;
@@ -420,18 +427,37 @@ void loop() {
     if(!RTC_time.isOk) {
       // Unmute now as the time seems not to be available
       //
-      // ...
+      doUserUnmute = true;
     }
     else {
       // Check time ...
       //
-      /*
-      typedef struct {
-        byte            second, minute, hour, day, month, year;
-        bool            isOk;
-      } RTC_time_t;
-      */
+      if(!Radio.isMute) {
+        monkeyRadio.hardMute();
+        monkeyRadio.setVolume(0);
+        Radio.isMute = true;
+        RTC_time1    = RTC_time;
+        getNextFullOrHalfHour(&RTC_time1);
+        RTCTimeToTimeDateStr(RTC_time1, sTemp, false);
+        SER_DEBUG.print(F("Mute until "));
+        SER_DEBUG.print(sTemp);
+        SER_DEBUG.println();
+        //...
+      }
+      else {
+        doUserUnmute    = isItTime(&RTC_time, &RTC_time1);
+        didUnmuteOnTime = doUserUnmute;
+      }  
     }
+  }
+  if(doUserUnmute) {
+    // Unmute ...
+    //
+    monkeyRadio.hardUnMute();
+    monkeyRadio.setVolume(Radio.volume);
+    Radio.isMute  = false;
+    doUserUnmute  = false;
+    isMutedByUser = false;
   }
 
   // Update radio info at a defined interval

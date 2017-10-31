@@ -39,7 +39,7 @@ void updateStateInfo()
           // Update time
           //
           monkeyRadio.getRTC(&RTC_time);
-          RTCTimeToTimeDateStr(DISPLAY_TIME_WSEC);
+          RTCTimeToTimeDateStr(RTC_time, Radio.RTC_timeDateStr, DISPLAY_TIME_WSEC);
 
           // Update signal quality indicator (info LED)
           //

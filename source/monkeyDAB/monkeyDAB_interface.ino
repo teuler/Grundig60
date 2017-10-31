@@ -274,9 +274,12 @@ void updateFSM()
     SER_DEBUG.println("COMMERICAL MUTE STARTED");
   }
   if(!isCommercialMute && isMutedByUser){
-    doUserUnmute  = true;
-    isMutedByUser = false;
+    doUserUnmute    = true;
+    isMutedByUser   = false;
   }
+  if(!isCommercialMute && !isMutedByUser){
+    didUnmuteOnTime = false;
+  }  
 
   // If changed, print state name to log
   //
